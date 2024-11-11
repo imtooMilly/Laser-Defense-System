@@ -8,22 +8,22 @@ Servo servoY;
 int xPin = A0;
 int yPin = A1;
 
-int laserPin = 13;
+int ledPin = 13;
 int buttonSwitchPin = 2;
 
 int xServoPin = 9;
 int yServoPin = 10;
 
-int servoMax = 180;
+int servoMax = 90;
 
 // these int values contain where the joystick is currently on their respective axis
 int valX;
 int valY;
 
-// These variables are meant to see the current and previous button state in addition to the Laser state. It's meant for toggling the laser on/off based on the button press
+// These variables are meant to see the current and previous button state in addition to the Led state. It's meant for toggling led on/off
 int buttonState;
 int previousButtonState = HIGH;
-bool laserState = false; // By default laser state should be false 
+bool ledState = false; // By default led state should be false 
 
 // These int values store where the servo is currently in its rotation
 int xServoPos;
@@ -34,8 +34,8 @@ void setup() {
   servoX.attach(xServoPin); // Attach servoX to pin 9 and servoY to pin 10
   servoY.attach(yServoPin); 
 
-  // Set laser Pin to be output 
-  pinMode(laserPin, OUTPUT);
+  // Set led Pin to be output 
+  pinMode(ledPin, OUTPUT);
   pinMode(xPin, INPUT); // change pins A0, A1, and 2 to inputs
   pinMode(yPin, INPUT);
   pinMode(buttonSwitchPin, INPUT_PULLUP); //this button requires the use of arduino's internal pull up resistor
@@ -53,14 +53,9 @@ void loop() {
   servoX.write(xServoPos);
   servoY.write(yServoPos);
 
-  // Toggle Button On/Off (How we know if the button was pressed is when we check if the state goes from HIGH TO LOW (based on the INPUT_PULLUP))
+  // Toggle Button On/Off (Low for Press High For released)
   if (buttonState == LOW && previousButtonState == HIGH){
-    laserState = !laserState;
-    digitalWrite(laserPin, laserState);
+    ledState = !ledState;
+    digitalWrite(ledPin, ledState);
     delay(50);
   }
-
-  // After button toggle, set the previous state variable state to be equal to the prior current state
-  previousButtonState = buttonState;
-
-}
