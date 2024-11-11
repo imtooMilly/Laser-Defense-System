@@ -14,7 +14,7 @@ int buttonSwitchPin = 2;
 int xServoPin = 9;
 int yServoPin = 10;
 
-int servoMax = 90;
+int servoMax = 180;
 
 // these int values contain where the joystick is currently on their respective axis
 int valX;
