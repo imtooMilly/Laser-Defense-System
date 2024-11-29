@@ -29,13 +29,14 @@ int sensorServoPin = 11;
 int servoMax = 180;
 int xServoPos;
 int yServoPos;
-int sensorAngle = 0; 
+int currentSensorAngle = 0; 
+bool increasing = true; // Tracks the direction of the sweep
 
 // Mode selection variables
 int modeButtonPin = 3; // New button for mode selection
 int modeButtonState;
 int previousModeButtonState = HIGH;
-bool isJoystickMode = false; // By default it sets mode state to Joystick mode
+bool isJoystickMode = true; // By default it sets mode state to Joystick mode
 
 // Ultrasonic sensor setup
 int trigPin = 5;
@@ -110,45 +111,50 @@ void joystickMode(){
 }
 
 void ultrasonicMode() {
-  for (sensorAngle = 0; sensorAngle <= 180; sensorAngle += 10) {
-    // Sweep the ultrasonic sensor
-    sensorServo.write(sensorAngle);
-    delay(200); // Allow the servo to stabilize
+  // Sweep the ultrasonic sensor incrementally
+  sensorServo.write(currentSensorAngle);
+  delay(200); // Allow the servo to stabilize
 
-    // Measure distance
-    distance = getDistance();
+  // Measure distance
+  distance = getDistance();
 
-    // If the ultrasonic sensor detects a object 50cm the servo's attached to the laser will move accordingly 
-    if (distance > 0 && distance <= 50) { 
-      // Map distance and sensor angle to servo positions
-      int mappedX = map(sensorAngle, 0, 180, 0, servoMax);
-      int mappedY = map(distance, 0, 200, 0, servoMax);
+  // If the ultrasonic sensor detects an object within 50cm, move the servos
+  if (distance > 0 && distance <= 50) { 
+    int mappedX = map(currentSensorAngle, 0, 180, 0, servoMax);
+    int mappedY = map(distance, 0, 200, 0, servoMax);
 
-      // Move the servos to the detected object's position
-      servoX.write(mappedX);
-      servoY.write(mappedY);
+    servoX.write(mappedX);
+    servoY.write(mappedY);
 
-      // Turn on the laser
-      digitalWrite(laserPin, HIGH);
+    digitalWrite(laserPin, HIGH);
 
-      // Debugging: Print details
-      Serial.print("Object Detected - Sensor Angle: ");
-      Serial.print(sensorAngle);
-      Serial.print("°, Distance: ");
-      Serial.print(distance);
-      Serial.print(" cm, Mapped X: ");
-      Serial.print(mappedX);
-      Serial.print(", Mapped Y: ");
-      Serial.println(mappedY);
-    } else {
-      // No object detected: keep servos stationary and turn off the laser
-      digitalWrite(laserPin, LOW);
+    Serial.print("Object Detected - Sensor Angle: ");
+    Serial.print(currentSensorAngle);
+    Serial.print("°, Distance: ");
+    Serial.print(distance);
+    Serial.print(" cm, Mapped X: ");
+    Serial.print(mappedX);
+    Serial.print(", Mapped Y: ");
+    Serial.println(mappedY);
+  } else {
+    digitalWrite(laserPin, LOW);
+    Serial.println("No object detected.");
+  }
 
-      // Debugging: Print status
-      Serial.println("No object detected.");
+  // Update the sensor angle for the next step
+  if (increasing) {
+    currentSensorAngle += 10;
+    if (currentSensorAngle >= 180) {
+      increasing = false; // Reverse direction
+    }
+  } else {
+    currentSensorAngle -= 10;
+    if (currentSensorAngle <= 0) {
+      increasing = true; // Reverse direction
     }
   }
 }
+
 
 long getDistance() {
   // Send ultrasonic pulse
