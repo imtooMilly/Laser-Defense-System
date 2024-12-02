@@ -118,8 +118,8 @@ void ultrasonicMode() {
   // Measure distance
   distance = getDistance();
 
-  // If the ultrasonic sensor detects an object within 50cm, move the servos
-  if (distance > 0 && distance <= 50) { 
+  // If the ultrasonic sensor detects an object within 15cm, move the servos
+  if (distance > 0 && distance <= 15) { 
     int mappedX = map(currentSensorAngle, 0, 180, 0, servoMax);
     int mappedY = map(distance, 0, 200, 0, servoMax);
 
